@@ -1,0 +1,68 @@
+#!/bin/sh
+
+# PROVIDE: EiniaOraCoin
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+#
+# Add the following lines to /etc/rc.conf.local or /etc/rc.conf
+# to enable this service:
+#
+# EiniaOraCoin_enable (bool): Set to NO by default. Set this variable to YES if you want to enable EiniaOraCoin service.
+# EiniaOraCoin_config (path): Set to /usr/local/etc/EiniaOraCoin.conf by default.
+# EiniaOraCoin_user:  The user account EiniaOraCoin daemon runs as. It uses 'root' user by default.
+# EiniaOraCoin_group: The group account EiniaOraCoin daemon runs as. It uses 'wheel' group by default.
+# EiniaOraCoin_datadir (str): Default to "/var/db/EiniaOraCoin". Base data directory.
+
+. /etc/rc.subr
+
+name=EiniaOraCoin
+rcvar=EiniaOraCoin_enable
+
+: ${EiniaOraCoin_enable:=NO}
+: ${EiniaOraCoin_config=/usr/local/etc/EiniaOraCoin.conf}
+: ${EiniaOraCoin_datadir=/var/db/EiniaOraCoin}
+: ${EiniaOraCoin_user="root"}
+: ${EiniaOraCoin_group="wheel"}
+
+required_files=${EiniaOraCoin_config}
+command=/usr/local/bin/EiniaOraCoind
+EiniaOraCoin_chdir=${EiniaOraCoin_datadir}
+pidfile="${EiniaOraCoin_datadir}/EiniaOraCoind.pid"
+stop_cmd=EiniaOraCoin_stop
+command_args="-conf=${EiniaOraCoin_config} -datadir=${EiniaOraCoin_datadir} -noupnp -daemon -pid=${pidfile}"
+start_precmd="${name}_prestart"
+
+EiniaOraCoin_create_datadir()
+{
+	echo "Creating data directory"
+	eval mkdir -p ${EiniaOraCoin_datadir}
+	[ $? -eq 0 ] && chown -R ${EiniaOraCoin_user}:${EiniaOraCoin_group} ${EiniaOraCoin_datadir}
+}
+
+EiniaOraCoin_prestart()
+{
+	if [ ! -d "${EiniaOraCoin_datadir}/." ]; then
+		EiniaOraCoin_create_datadir || return 1
+	fi
+}
+
+EiniaOraCoin_requirepidfile()
+{
+	if [ ! "0`check_pidfile ${pidfile} ${command}`" -gt 1 ]; then
+		echo "${name} not running? (check $pidfile)."
+		exit 1
+	fi
+}
+
+EiniaOraCoin_stop()
+{
+    EiniaOraCoin_requirepidfile
+
+	echo "Stopping ${name}."
+	eval ${command} -conf=${EiniaOraCoin_config} -datadir=${EiniaOraCoin_datadir} stop
+	wait_for_pids ${rc_pid}
+}
+
+load_rc_config $name
+run_rc_command "$1"

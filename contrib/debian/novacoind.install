@@ -1,0 +1,2 @@
+debian/bin/EiniaOraCoind usr/bin
+src/EiniaOraCoind usr/lib/EiniaOraCoin

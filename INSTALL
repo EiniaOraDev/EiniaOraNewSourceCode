@@ -1,0 +1,9 @@
+Building EiniaOraCoin
+
+See doc/readme-qt.rst for instructions on building EiniaOraCoin Qt,
+the intended-for-end-users, nice-graphical-interface, reference
+implementation of EiniaOraCoin.
+
+See doc/build-*.txt for instructions on building EiniaOraCoind,
+the intended-for-services, no-graphical-interface, reference
+implementation of EiniaOraCoin.
