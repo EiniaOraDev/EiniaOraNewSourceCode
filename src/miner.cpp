@@ -718,16 +718,6 @@ void StakeMiner(CWallet *pwallet)
 
                 return;
             }
-			
-			// Disable PoS mining before 7 June 2015, 00:00:00 GMT
-			if (GetAdjustedTime() < 1433635200)
-			{
-                string strMessage = _("Warning: PoS not enabled yet.");
-                strMiscWarning = strMessage;
-                printf("*** %s\n", strMessage.c_str());
-
-                return;
-            }
 
             // Now we have new coinstake, it's time to create the block ...
             CBlock* pblock;

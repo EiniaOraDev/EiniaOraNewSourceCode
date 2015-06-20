@@ -27,13 +27,15 @@ typedef std::map<int, unsigned int> MapModifierCheckpoints;
 // Hard checkpoints of stake modifiers to ensure they are deterministic
 static std::map<int, unsigned int> mapStakeModifierCheckpoints =
     boost::assign::map_list_of
-        ( 9999999999999999999999, 0x0e00670bu )
+		( 0, 0x0e00670bu )
+    //    ( 9999999999999999999999, 0x0e00670bu )
     ;
 
 // Hard checkpoints of stake modifiers to ensure they are deterministic (testNet)
 static std::map<int, unsigned int> mapStakeModifierCheckpointsTestNet =
     boost::assign::map_list_of
-        ( 99999999999999999999, 0x0e00670bu )
+		( 0, 0x0e00670bu )
+      //  ( 99999999999999999999, 0x0e00670bu )
     ;
 
 // Pregenerated entropy bits table (from genesis to #9689)
