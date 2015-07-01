@@ -1033,9 +1033,6 @@ int64_t GetProofOfWorkReward(unsigned int nBits, int nHeight)
 		return 150 * COIN;
 	else if (nHeight < 4001)
 		return 75 * COIN;
-		
-	if (nHeight > 6000)
-		return 1 * COIN;
 	
 	return 0 * COIN;
 }
@@ -1047,6 +1044,10 @@ int64_t GetProofOfStakeReward(int64_t nCoinAge, unsigned int nBits, int64_t nTim
 
     // Creation amount per coin-year, 365% fixed stake mint rate
         nRewardCoinYear = 365 * CENT;
+		
+	// 7 June 2015 00:00:00 GMT. Possible hardfork after this time.
+	if (nTime < 1433635200)
+		nRewardCoinYear = 0 * CENT;
 
     if(bCoinYearOnly)
         return nRewardCoinYear;
@@ -1125,6 +1126,9 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfSta
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
     CBigNum bnTargetLimit = !fProofOfStake ? bnProofOfWorkLimit : GetProofOfStakeLimit(pindexLast->nHeight, pindexLast->nTime);
+	
+	if (!fProofOfStake && pindexLast->nHeight > 6000)
+		return bnSTOPPOW.GetCompact(); // Stop POW blocks
 
     if (pindexLast == NULL)
         return bnTargetLimit.GetCompact(); // genesis block
