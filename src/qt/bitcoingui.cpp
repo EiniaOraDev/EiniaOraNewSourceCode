@@ -28,6 +28,7 @@
 #include "ui_interface.h"
 #include "rpcconsole.h"
 #include "mintingview.h"
+#include "wallet.h"
 
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
@@ -90,8 +91,9 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     aboutDialog(0),
     optionsDialog(0)
 {
-    resize(850, 550);
+    setFixedSize(950, 550);
     setWindowTitle(tr("EiniaOraCoin") + " - " + tr("Wallet"));
+    qApp->setStyleSheet("QMainWindow { background-image:url(:images/bkg);border:none;font-family:'Open Sans,sans-serif'; } #frame { } QToolBar QLabel { padding-top:15px;padding-bottom:10px;margin:0px; } #spacer { background:rgb(80,80,80);border:none; } #toolbar3 { border:none;width:1px; background-color: rgb(56,56,56); } #statusbar { border:none;width:56px; background-color:rgb(80,80,80); } #toolbar { border:none;height:100%;padding-top:20px; background: rgb(80,80,80); text-align: left; color: white;min-width:150px;max-width:150px;} QToolBar QToolButton:hover {background-color:qlineargradient(x1: 0, y1: 0, x2: 2, y2: 2,stop: 0 rgb(80,80,80), stop: 1 rgb(216,252,251),stop: 2 rgb(59,62,65));} QToolBar QToolButton { font-family:Century Gothic;padding-left:20px;padding-right:150px;padding-top:10px;padding-bottom:10px; width:100%; color: white; text-align: left; background-color: rgb(80,80,80) } #labelMiningIcon { padding-left:5px;font-family:Century Gothic;width:100%;font-size:10px;text-align:center;color:white; } QMenu { background: rgb(80,80,80); color:white; padding-bottom:10px; } QMenu::item { color:white; background-color: transparent; } QMenu::item:selected { background-color:qlineargradient(x1: 0, y1: 0, x2: 0.5, y2: 0.5,stop: 0 rgb(80,80,80), stop: 1 rgb(149,204,244)); } QMenuBar { background: rgb(80,80,80); color:white; } QMenuBar::item { font-size:12px;padding-bottom:8px;padding-top:8px;padding-left:15px;padding-right:15px;color:white; background-color: transparent; } QMenuBar::item:selected { background-color:qlineargradient(x1: 0, y1: 0, x2: 0.5, y2: 0.5,stop: 0 rgb(80,80,80), stop: 1 rgb(149,204,244)); }");
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/bitcoin"));
     setWindowIcon(QIcon(":icons/bitcoin"));
@@ -154,11 +156,13 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     // Status bar notification icons
     QFrame *frameBlocks = new QFrame();
     frameBlocks->setContentsMargins(0,0,0,0);
-    frameBlocks->setMinimumWidth(72);
-    frameBlocks->setMaximumWidth(72);
+    frameBlocks->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+//    frameBlocks->setMinimumWidth(72);
+//    frameBlocks->setMaximumWidth(72);
     QHBoxLayout *frameBlocksLayout = new QHBoxLayout(frameBlocks);
     frameBlocksLayout->setContentsMargins(3,0,3,0);
     frameBlocksLayout->setSpacing(3);
+	
     labelEncryptionIcon = new QLabel();
     labelMiningIcon = new QLabel();
     labelConnectionsIcon = new QLabel();
@@ -179,19 +183,30 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     progressBar = new QProgressBar();
     progressBar->setAlignment(Qt::AlignCenter);
     progressBar->setVisible(false);
-
+	progressBar->setFixedHeight(28);
+	progressBar->setStyleSheet("QProgressBar { background-color:rgb(80,80,80); border: 1px solid grey; border-radius: 7px; padding: 1px; text-align: center; } QProgressBar::chunk { background: QLinearGradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FF8000, stop: 1 orange); border-radius: 7px; margin: 0px; }");
+	statusBar()->addWidget(progressBarLabel);
+    statusBar()->addWidget(progressBar);
+    statusBar()->addPermanentWidget(frameBlocks);
     // Override style sheet for progress bar for styles that have a segmented progress bar,
     // as they make the text unreadable (workaround for issue #1071)
     // See https://qt-project.org/doc/qt-4.8/gallery.html
+	
+	
     QString curStyle = qApp->style()->metaObject()->className();
     if(curStyle == "QWindowsStyle" || curStyle == "QWindowsXPStyle")
     {
         progressBar->setStyleSheet("QProgressBar { background-color: #e8e8e8; border: 1px solid grey; border-radius: 7px; padding: 1px; text-align: center; } QProgressBar::chunk { background: QLinearGradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FF8000, stop: 1 orange); border-radius: 7px; margin: 0px; }");
     }
 
-    statusBar()->addWidget(progressBarLabel);
-    statusBar()->addWidget(progressBar);
-    statusBar()->addPermanentWidget(frameBlocks);
+	addToolBarBreak(Qt::TopToolBarArea);
+    QToolBar *toolbar3 = addToolBar(tr("Green bar"));
+    addToolBar(Qt::TopToolBarArea,toolbar3);
+    toolbar3->setOrientation(Qt::Horizontal);
+    toolbar3->setMovable( false );
+    toolbar3->setObjectName("toolbar3");
+    toolbar3->setFixedHeight(2);
+	
 
     syncIconMovie = new QMovie(":/movies/update_spinner", "mng", this);
 
@@ -400,7 +415,12 @@ void BitcoinGUI::createMenuBar()
 void BitcoinGUI::createToolBars()
 {
     QToolBar *toolbar = addToolBar(tr("Tabs toolbar"));
+    toolbar->setObjectName("toolbar");
+    addToolBar(Qt::LeftToolBarArea,toolbar);
+    toolbar->setOrientation(Qt::Vertical);
+    toolbar->setMovable( false );
     toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    toolbar->setIconSize(QSize(50,25));
     toolbar->addAction(overviewAction);
     toolbar->addAction(sendCoinsAction);
     toolbar->addAction(receiveCoinsAction);
@@ -408,11 +428,18 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(mintingAction);
     toolbar->addAction(addressBookAction);
 
+    QWidget* spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    toolbar->addWidget(spacer);
+    spacer->setObjectName("spacer");
+	toolbar->addAction(unlockWalletAction);
+	toolbar->addAction(lockWalletAction);
+	/*
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolbar2->addAction(exportAction);
     toolbar2->setVisible(false);
-    
+    */
 }
 
 void BitcoinGUI::setClientModel(ClientModel *clientModel)
