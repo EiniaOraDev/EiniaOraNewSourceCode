@@ -1136,7 +1136,12 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     if (pindexPrevPrev->pprev == NULL)
         return bnTargetLimit.GetCompact(); // second block
 
-    int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+	int64 nCheckTime = GetTime();
+	if (nCheckTime > 1437789600) //Human time (GMT): Sat, 25 July 2015 02:00:00 GMT
+	{
+		int nHeight = pindexPrev->nHeight + 1;
+		if (nHeight >= 20987 & nActualSpacing < 0) nActualSpacing = 0;  //Sanity Check on nActualSpacing, corrects negative block values
+	}
 
     // ppcoin: target change every block
     // ppcoin: retarget with exponential moving toward target spacing
