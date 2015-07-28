@@ -1136,7 +1136,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     if (pindexPrevPrev->pprev == NULL)
         return bnTargetLimit.GetCompact(); // second block
 
-	int64 nCheckTime = GetTime();
+	int64_t nCheckTime = GetTime();
 	if (nCheckTime > 1437789600) //Human time (GMT): Sat, 25 July 2015 02:00:00 GMT
 	{
 		int nHeight = pindexPrev->nHeight + 1;
@@ -2717,7 +2717,7 @@ bool LoadBlockIndex(bool fAllowNew)
         block.hashPrevBlock = 0;
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
-        block.nTime    = 1432656588;
+		block.nTime = 1437717600;
         block.nBits    = bnProofOfWorkLimit.GetCompact();
 		block.nNonce   = !fTestNet ? 1134891 : 1134891;
 
